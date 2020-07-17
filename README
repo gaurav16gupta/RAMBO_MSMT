@@ -26,6 +26,8 @@ wikipedia/doc_words_AC
 wikipedia/efficiency_topicsGT.csv (also given pregenerated)
 wikipedia/wordDict (also given pregenerated)
 
+step 3: create folders for result
+	mkdir -p results/RAMBO_wiki
 Step 4: Set parameters
 number of sets in line 6 of include/constants.h
 m, B and R in line 39-41 of src/main.cpp
