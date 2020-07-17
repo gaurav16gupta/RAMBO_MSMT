@@ -1,0 +1,35 @@
+
+
+Step 1: data download from 
+https://bitfunnel.blob.core.windows.net/sample-data/Wikipedia/small-corpus.tar.gz
+run:
+	cd sample-data
+	mv wikipedia data/
+
+Step 2: Preprocess data and get ground truth for test set
+run:
+	mv parse.py wikipedia/
+	mv getTokens.py wikipedia/
+	mv efficiency_topics wikipedia/
+
+	python3 parse.py
+	python3 parseAndGT.py
+	cd ..
+
+It should generate these files
+wikipedia/doc_ID_AA
+wikipedia/doc_ID_AB
+wikipedia/doc_ID_AC
+wikipedia/doc_words_AA
+wikipedia/doc_words_AB
+wikipedia/doc_words_AC
+wikipedia/efficiency_topicsGT.csv (also given pregenerated)
+wikipedia/wordDict (also given pregenerated)
+
+Step 4: Set parameters
+number of sets in line 6 of include/constants.h
+m, B and R in line 39-41 of src/main.cpp
+run:
+	make
+	./build/program 0
+

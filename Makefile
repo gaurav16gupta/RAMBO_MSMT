@@ -1,7 +1,7 @@
 # declare variables
 
 CXX      := g++
-CXXFLAGS := -Wall -fopenmp -std=c++11 -O2
+CXXFLAGS := -Wall -fopenmp -std=c++17 -O2
 INCLUDE  := -Iinclude/
 BUILD    := ./build
 TARGET   := program
@@ -11,7 +11,6 @@ SRC      :=                      \
 	 $(wildcard src/Rambo_construction.cpp) \
 	 $(wildcard src/bitArray.cpp) \
 	 $(wildcard src/utils.cpp)   \
-	 $(wildcard src/MyBloom.cpp)   \
 	 $(wildcard src/main.cpp)   \
 
 

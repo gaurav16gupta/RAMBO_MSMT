@@ -8,7 +8,7 @@
 #include <string>
 #include <string.h>
 #include <algorithm>
-#include "MyBloom.h"
+// #include "MyBloom.h"
 #include "MurmurHash3.h"
 #include "Rambo_construction.h"
 #include "utils.h"
@@ -16,22 +16,40 @@
 #include "bitArray.h"
 #include <set>
 #include <iterator>
-#include <bitset>
+// #include <bitset>
 
 using namespace std;
 
 vector<uint> RAMBO:: hashfunc( std::string key, int len){
   // int hashvals[k];
   vector <uint> hashvals;
-  uint op;
-  for (int i=0; i<R; i++){
-    MurmurHash3_x86_32(key.c_str(), len, 10, &op); //seed i
-    hashvals.push_back(op%B);
+  uint op; // takes 4 byte
+  if (R==2){
+    MurmurHash3_x86_32(key.c_str(), len, 1, &op); //seed i
+    hashvals.push_back((op )%B);
+    hashvals.push_back((op >>8 )%B);
+  }
+  else{
+    for (int i=0; i<R; i++){
+      MurmurHash3_x86_32(key.c_str(), len, i, &op); //seed i
+      hashvals.push_back(op%B);
+    }}
+  return hashvals;
+}
+
+vector<uint> myhash( std::string key, int len, int k, int r, int range){
+  // int hashvals[k];
+  vector <uint> hashvals;
+  uint op; // takes 4 byte
+  MurmurHash3_x86_32(key.c_str(), len, r, &op);
+  for (int i=0+r*k; i<k +r*k; i++){
+    hashvals.push_back((op>>(2*i))%range);
   }
   return hashvals;
 }
 
 std::vector <std::string>  RAMBO:: getdata(string filenameSet){
+
   //get the size of Bloom filter by count
   ifstream cntfile (filenameSet);
   std::vector <std::string> allKeys;
@@ -44,6 +62,7 @@ std::vector <std::string>  RAMBO:: getdata(string filenameSet){
               is<<line1;
               if (line1[0]!= '>' && line1.size()>30 ){
                 for (uint idx =0; idx<line1.size()-31 +1; idx++){
+                  // std::cout<<line1.substr(idx, 31)<<std::endl;
                   allKeys.push_back(line1.substr(idx, 31));
                   totKmerscnt++;
                 }
@@ -56,24 +75,25 @@ std::vector <std::string>  RAMBO:: getdata(string filenameSet){
 
 
 RAMBO::RAMBO(int n, int r1, int b1, int K){
+  // p = fpr1;
+  // FPR = fpr1;
   R = r1;
   B = b1;
   K = K;
-
+  k = 3;
   //range = ceil(-(n*log(p))/(log(2)*log(2))); //range
   range = n;
-  k = 3;
   std::cout << "range" <<range<< '\n';
 
-  //k = ceil(-log(p)/log(2)); //number of hash, k is 7 for 0.01
-  Rambo_array = new BloomFiler*[B*R]; //array of pointers
-  metaRambo = new vector<int>[B*R]; //constains set info in it.
-  for(int b=0; b<B; b++){
-    for(int r=0; r<R; r++){
-      Rambo_array[b + B*r] = new BloomFiler(range, p, k);
-    }
+  int sz = range*B*R/8 + 1;
+  Rambo_array  = new char[sz];
+  for (int i=0; i<sz; i++ ){
+    Rambo_array[i] = '\0'; // Clear the bit array
   }
 
+  // Rambo_array = new BloomFiler*[B*R]; //array of pointers .....dynamically allocated
+  // // std::vector<BloomFiler>  Rambo_array(B*R, BloomFiler(n, p, range, k));
+  metaRambo = new vector<int>[B*R]; //constains set info in it.
 }
 // one time process- a preprocess step
 void RAMBO::createMetaRambo(int K, bool verbose){
@@ -83,7 +103,6 @@ void RAMBO::createMetaRambo(int K, bool verbose){
       metaRambo[hashvals[r] + B*r].push_back(i);
     }
   }
-
   //print RAMBO meta deta
   if (verbose){
     for(int b=0; b<B; b++){
@@ -100,21 +119,23 @@ void RAMBO::createMetaRambo(int K, bool verbose){
 // give set and keys in the set
 void RAMBO::insertion (std::string setID, std::vector<std::string> keys){
   vector<uint> hashvals = RAMBO::hashfunc(setID, setID.size()); // R hashvals
-
   //make this loop parallel
   #pragma omp parallel for
   for(std::size_t i=0; i<keys.size(); ++i){
     for(int r=0; r<R; r++){
-      vector<uint> temp = myhash(keys[i].c_str(), keys[i].size() , k,r, range);
-      Rambo_array[hashvals[r] + B*r]->insert(temp);
+      vector<uint> temp = myhash(keys[i].c_str(), keys[i].size() , k, r, range);
+      int loc = (hashvals[r] + B*r)*range/8;
+      for (int n =0 ; n<temp.size(); n++){
+        Rambo_array[loc + (temp[n]/8)] |= (1 << (temp[n]%8));
+      }
+      // Rambo_array[hashvals[r] + B*r]->insert(temp);
     }
   }
 }
 
 // given inverted index type arrangement, kmer;files;files;..
 void RAMBO::insertion2 (std::vector<string> alllines){
-  //make this loop parallel
-  //#pragma omp parallel for
+  #pragma omp parallel for
   for(std::size_t i=0; i<alllines.size(); ++i){
     char d = ';';
     std::vector<string>KeySets =  line2array(alllines[i], d);//sets for a key
@@ -123,84 +144,92 @@ void RAMBO::insertion2 (std::vector<string> alllines){
     for (uint j = 0; j<KeySet.size(); j++){
       vector<uint> hashvals = RAMBO::hashfunc(KeySet[j], KeySet[j].size()); // R hashvals
       for(int r=0; r<R; r++){
-	vector<uint> temp = myhash(KeySets[0].c_str(), KeySets[0].size() , k, r, range);// i is the key
-        Rambo_array[hashvals[r] + B*r]->insert(temp);
+        vector<uint> temp = myhash(KeySets[0].c_str(), KeySets[0].size() , k, r, range);// need optimization here
+
+        //
+        int loc = (hashvals[r] + B*r)*range/8;
+        for (int n =0 ; n<temp.size(); n++){
+          Rambo_array[loc + (temp[n]/8)] |= (1 << (temp[n]%8));
+        }
+        // Rambo_array[hashvals[r] + B*r]->insert(temp);
       }
     }
   }
 }
-
-// // give set and keys in the set
-// void RAMBO::insertionRare (std::string setID, std::vector<std::string> keys){
-//   vector<uint> hashvals = RAMBO::hashfunc(setID, setID.size()); // R hashvals
-//
-//   //make this loop parallel
-//   int skip =0;
-//   #pragma omp parallel for
-//   for(std::size_t i=0; i<keys.size(); ++i){
-//     bitArray MemVec = RAMBO::query(keys[i].c_str(), keys[i].size());
-//     if ( MemVec.getcount() <10 ){
-//       for(int r=0; r<R; r++){
-//       vector<uint> temp = myhash(keys[i].c_str(), keys[i].size() , k, r, range);
-//         Rambo_array[hashvals[r] + B*r]->insert(temp);
-//     }
-//   }
-//     else{ skip++;}
-//   }
-//   cout<<"skipped "<<to_string(skip)<<endl;
-// }
-
 
 bitArray RAMBO::query (string query_key, int len){
   // set<int> resUnion[R]; //constains union results in it.
   bitArray bitarray_K(Ki);
   // bitset<Ki> bitarray_K;
   // set<int> res;
-  float count=0.0;
-  vector<uint> check;
+
   for(int r=0; r<R; r++){
-    check = myhash(query_key, len , k, r,range); //hash values correspondign to the keys
+    chrono::time_point<chrono::high_resolution_clock> t1 = chrono::high_resolution_clock::now();
+    vector<uint> check = myhash(query_key, len , k, r, range); //hash values correspondign to the keys
+    chrono::time_point<chrono::high_resolution_clock> t2 = chrono::high_resolution_clock::now();
+    // cout<<"time for hash calc: "<<((t2-t1).count()/1000000000.0)<<endl;;
+
     bitArray bitarray_K1(Ki);
     // bitset<Ki> bitarray_K1;
+    float count=0.0;
+    // #pragma omp parallel for
+    chrono::time_point<chrono::high_resolution_clock> t3 = chrono::high_resolution_clock::now();
+
     for(int b=0; b<B; b++){
-        if (Rambo_array[b + B*r]->test(check)){
-          chrono::time_point<chrono::high_resolution_clock> t5 = chrono::high_resolution_clock::now();
+        bool MTcheck = true;
+        for (int n =0 ; n<check.size(); n++){
+            if (!(Rambo_array[(b + B*r)*range/8 + (check[n]/8)] & (1 << (check[n]%8)))){
+              MTcheck = false;
+              break;
+            }
+          }
+        //Rambo_array[b + B*r]->test(check)
+        if (MTcheck){
           for (uint j=0; j<metaRambo[b + B*r].size(); j++){
             bitarray_K1.SetBit(metaRambo[b + B*r][j]);
         }
-        chrono::time_point<chrono::high_resolution_clock> t6 = chrono::high_resolution_clock::now();
-        count+=((t6-t5).count()/1000000000.0);
+        // count+=((t6-t5).count()/1000000000.0);
       }
     }
+    chrono::time_point<chrono::high_resolution_clock> t4 = chrono::high_resolution_clock::now();
+    // cout<<"time for bit setting: "<<((t4-t3).count()/1000000000.0)<<endl;
+    count+=((t4-t3).count()/1.0);
+
+    // cout<<"time for BF check : "<<count/B<<endl;
     if (r ==0){
       bitarray_K = bitarray_K1;
     }
     else{
+      chrono::time_point<chrono::high_resolution_clock> t5 = chrono::high_resolution_clock::now();
       bitarray_K.ANDop(bitarray_K1.A);
+      chrono::time_point<chrono::high_resolution_clock> t6 = chrono::high_resolution_clock::now();
+      // cout<<"time for AND op : "<<((t6-t5).count()/1000000000.0)<<endl;;
     }
   }
-  vector<uint>().swap(check);
   return bitarray_K;
 }
 
+
 void RAMBO::serializeRAMBO(string dir){
-  for(int b=0; b<B; b++){
-    for(int r=0; r<R; r++){
-      string br = dir + to_string(b) + "_" + to_string(r) + ".txt";
-      Rambo_array[b + B*r]->serializeBF(br);
-    }
+  //todo
+  string br = dir + to_string(B) + "_" + to_string(R) + "_" + to_string(range)+ ".txt";
+  ofstream out;
+  out.open(br);
+
+  if(! out){
+    cout<<"Cannot open output file\n";
   }
+  out.write(Rambo_array, B*R*range/8 +1);
+    out.close();
 }
 
 void RAMBO::deserializeRAMBO(vector<string> dir){
-  for(int b=0; b<B; b++){
-    for(int r=0; r<R; r++){
-      vector<string> br;
-     	for (uint j=0; j<dir.size(); j++){
-	  br.push_back(dir[j] + to_string(b) + "_" + to_string(r) + ".txt");
-	}
-      Rambo_array[b + B*r]->deserializeBF(br);
 
-    }
+  string br = dir[0] + to_string(B) + "_" + to_string(R) + "_" + to_string(range)+ ".txt";
+  ifstream in(br);
+  if(! in){
+    cout<<"Cannot open searilized file\n";
   }
+  in.read(Rambo_array, B*R*range/8 +1);
+  in.close();
 }

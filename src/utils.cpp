@@ -8,12 +8,13 @@
 #include <string.h>
 #include <algorithm>
 #include <chrono>
-#include "MyBloom.h"
+// #include "MyBloom.h"
 #include "MurmurHash3.h"
 #include "utils.h"
 #include <map>
 #include <cassert>
 using namespace std;
+
 
 //readlines from a file
 std::vector<string> getsets( string path){
@@ -126,8 +127,37 @@ std::vector<string> readlines( string path, int num){
         }
         }
   std::cout << count<< '\n';
-  return allfiles;
+
   }
+  return allfiles;
+}
+
+std::vector <std::string> getdatafromFASTQ(string filenameSet){
+    ifstream cntfile (filenameSet);
+    std::vector <std::string> allKeys;
+    int totKmerscnt = 0;
+    while ( cntfile.good() )
+        {
+          string line1;
+          int a =0;
+          while( getline ( cntfile, line1 ) ){
+            if ((a-1)%4){}
+            else{
+              cout<<to_string(a)<<endl;
+              for (uint idx =0; idx<line1.size()-31 +1; idx++){
+                // std::cout<<line1.substr(idx, 31)<<std::endl;
+                allKeys.push_back(line1.substr(idx, 31));
+                totKmerscnt++;
+              }
+              std::cout << "Kmer inserted from" <<filenameSet <<" is "<<to_string(totKmerscnt)<<'\n';
+
+            }
+            a++;
+            // if (totKmerscnt>500000){break;}
+
+          }
+        }
+      return  allKeys;
 }
 
 std::vector<string> getRandomTestKeys(int keysize, int n){
@@ -186,11 +216,29 @@ std::map<std::string, vector<int>> makeInvIndex(int n, vector<std::string> folde
   return m;
 }
 
+
 std::vector<std::string> getkmers(std::string query_key, int kmersize){
   std::vector<std::string> query_kmers;
   for (uint idx =0; idx<query_key.size()-kmersize +1; idx++){
     query_kmers.push_back(query_key.substr(idx, kmersize));
   }
- return query_kmers;
+  return query_kmers;
 }
 
+
+// std::vector <std::string> getDocdata(string filenameSet){
+//   ifstream cntfile (filenameSet);
+//   std::vector <std::string> allDocs;
+//   int DocsCnt = 0;
+//   while (cntfile.good())
+//       {
+//           string line1;
+//           while( getline ( cntfile, line1 ) ){
+// 	            std::vector <std::string> linesplit = line2array(line1, ' ');
+//               allDocs.push_back(linesplit[1]);
+//               DocsCnt++;
+//           }
+//       }
+//       std::cout<<"total number of docs in "<<filenameSet<<" is "<<DocsCnt<<std::endl;
+//       return allDocs;
+// }
