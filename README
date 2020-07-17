@@ -18,10 +18,11 @@ Install wget and bzip2
 Install cortexpy Refer to this installation [document] (https://cortexpy.readthedocs.io/en/latest/overview.html#installation)
 
 run:
+	unzip data/0.zip
 	sh data/0/downoad.sh
+	mkdir -p results/RAMBOSer_100_0 results/RAMBOSer_200_0 results/RAMBOSer_500_0 results/RAMBOSer_1000_0 results/RAMBOSer_2000_0
 
 In the end we need to execute commands from 0_1.txt > 0_2.txt > 0_3.txt for the 100 files. 
-
 
 Step 2: ensure all 100 files are present in data/0/inflated/
 
