@@ -5,14 +5,14 @@
 #include <bitset>
 #include "bitArray.h"
 
-std::vector<uint> myhash(std::string key, int len, int k, int r, int range);
+std::vector<unsigned int> myhash(std::string key, int len, int k, int r, int range);
 
 class BloomFiler{
     public:
         // BloomFiler(int capacity, float FPR, int k);
         BloomFiler(int sz, float FPR, int k);
-        void insert(std::vector<uint> a);
-        bool test(std::vector<uint> a);
+        void insert(std::vector<unsigned int> a);
+        bool test(std::vector<unsigned int> a);
         void serializeBF(std::string BF_file);
         void deserializeBF(std::vector<std::string> BF_file);
 

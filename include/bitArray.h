@@ -10,9 +10,9 @@ class bitArray{
         // friend class boost::serialization::access;
 
         bitArray(int size);
-        void SetBit(uint k);
-        void ClearBit( uint k);
-        bool TestBit( uint k);
+        void SetBit(unsigned int k);
+        void ClearBit( unsigned int k);
+        bool TestBit( unsigned int k);
         void ANDop(char* B);
         void serializeBitAr(std::string BF_file);
         void deserializeBitAr(std::vector<std::string> BF_file);
