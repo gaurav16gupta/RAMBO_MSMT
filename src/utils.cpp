@@ -146,14 +146,14 @@ return s;
 
 std::map<std::string, vector<int>> makeInvIndex(int n, vector<std::string> foldernames){
   std::map<std::string, vector<int>> m;
-  for (uint f=0; f<foldernames.size(); f++){
+  for (unsigned int f=0; f<foldernames.size(); f++){
     string foldername = foldernames[f];
     for (int batch=0; batch<47; batch++){
   	string dataPath = foldername + to_string(batch)+ "_indexed.txt";
   	std::vector<string> setIDs = readlines(dataPath, 0);
   	cout<<setIDs[0]<<endl;
 
-  	for (uint ss=0; ss<setIDs.size(); ss++){
+  	for (unsigned int ss=0; ss<setIDs.size(); ss++){
     	  char d = ',';
     	  vector<std::string> setID = line2array(setIDs[ss], d);
           string mainfile = foldername + setID[1]+ ".out";
@@ -172,7 +172,7 @@ std::map<std::string, vector<int>> makeInvIndex(int n, vector<std::string> folde
     	   }
     	  else{
 
-    		for (uint i =0; i<keys.size(); i++){
+    		for (unsigned int i =0; i<keys.size(); i++){
       		   if (m.find(keys[i]) != m.end()){
         	     std::cout << "map contains the key!\n";
         	     m[keys[i]].push_back(std::stoi(setID[0]));
@@ -188,7 +188,7 @@ std::map<std::string, vector<int>> makeInvIndex(int n, vector<std::string> folde
 
 std::vector<std::string> getkmers(std::string query_key, int kmersize){
   std::vector<std::string> query_kmers;
-  for (uint idx =0; idx<query_key.size()-kmersize +1; idx++){
+  for (unsigned int idx =0; idx<query_key.size()-kmersize +1; idx++){
     query_kmers.push_back(query_key.substr(idx, kmersize));
   }
  return query_kmers;

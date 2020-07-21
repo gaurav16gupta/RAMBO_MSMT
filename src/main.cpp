@@ -61,7 +61,7 @@ if (insert == true){
     int stpt;
 	stpt = 5;
     //}
-    for (uint ss=0; ss<setIDs.size(); ss++){
+    for (unsigned int ss=0; ss<setIDs.size(); ss++){
       stpCnt++;
       char d = ',';
       vector<std::string> setID = line2array(setIDs[ss], d);
@@ -111,7 +111,7 @@ if(test){
   //std::vector<string> alllines = readlines("data/query.txt", 0);
   std::vector<string> testKeys;
   std::vector<int> gt_size;
-  for(uint i=0; i<alllines.size(); i++){
+  for(unsigned int i=0; i<alllines.size(); i++){
         std::vector<string>KeySets =  line2array(alllines[i], ';');//sets for a key
         testKeys.push_back(KeySets[0]);
         gt_size.push_back( line2array(KeySets[1], ',').size() );

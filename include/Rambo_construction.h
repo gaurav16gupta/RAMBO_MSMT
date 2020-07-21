@@ -8,14 +8,14 @@
 #include "bitArray.h"
 
 
-// vector<uint> hashfunc( void* key, int len, int R, int B){
+// vector<unsigned int> hashfunc( void* key, int len, int R, int B){
 // }
 
 class RAMBO{
     public:
 
         RAMBO(int n, int r1, int b1, int K);
-        std::vector<uint> hashfunc( std::string key, int len);
+        std::vector<unsigned int> hashfunc( std::string key, int len);
         void insertion (std::string setID, std::vector<std::string> keys);
         std::set<int> takeunion(std::set<int> set1, std::set<int> set2);
         std::set<int> takeIntrsec(std::set<int>* setArray);
