@@ -4,7 +4,7 @@ RAMBO is a method to reduce the query cost of sequence search over the archive o
 It solves achives sublinear query time (O(\sqrt{K} log K)) in number of files with memory requirement of slightly more then the information theoretical limit. 
 
 This code is the implementation of: 
-[https://arxiv.org/abs/1910.02611](https://arxiv.org/abs/1910.02611)
+[https://dl.acm.org/doi/10.1145/3448016.3457333](https://dl.acm.org/doi/10.1145/3448016.3457333)
 for gene sequence search.
 
 
