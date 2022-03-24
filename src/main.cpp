@@ -132,7 +132,7 @@ if(test){
 			bitArray MemVec = myRambo.query(testKeys[i], testKeys[i].size());
 			cout<<MemVec.getcount()<<endl;
 			cout<<gt_size[i]<<endl;
-			fp = fp + (MemVec.getcount())*0.1/((K - gt_size[i]*0.1));
+			fp = fp + (MemVec.getcount())*0.1/((K - gt_size[i])*0.1);
 		}
 
 	cout<<"fp rate is: "<<fp/(testKeys.size()); // false positives/(all negatives)
