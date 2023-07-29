@@ -13,15 +13,15 @@ bitArray::bitArray(int size){
    }
 }
 
-void bitArray::SetBit(uint k) {
+void bitArray::SetBit(unsigned int k) {
    A[(k/8)] |= (1 << (k%8));
 }
 
-void bitArray::ClearBit(uint k) {
+void bitArray::ClearBit(unsigned int k) {
    A[(k/8)] &= ~(1 << (k%8));
 }
 
-bool bitArray::TestBit(uint k) {
+bool bitArray::TestBit(unsigned int k) {
    return (A[(k/8)] & (1 << (k%8)));
 }
 
@@ -55,7 +55,7 @@ void bitArray::serializeBitAr(string BF_file){
 }
 
 void bitArray::deserializeBitAr(std::vector<string> BF_file){
-  for(uint j =0; j<BF_file.size(); j++){
+  for(unsigned int j =0; j<BF_file.size(); j++){
     char* C;
     C = new char[ar_size/8 +1];
     ifstream in(BF_file[j]);
